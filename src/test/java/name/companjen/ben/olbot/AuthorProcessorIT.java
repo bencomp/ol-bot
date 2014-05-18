@@ -3,39 +3,36 @@ package name.companjen.ben.olbot;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Integration test for the AuthorProcessor
  */
-public class AuthorProcessorIT {
+public class AuthorProcessorIT extends AbstractIT {
 
-    private static String endpointUrl;
+    @Before
+    public void setUp() {
+        webClient = WebClient.create(endpointUrl + "/olbot/authorname", providers);
 
-    @BeforeClass
-    public static void beforeClass() {
-        endpointUrl = System.getProperty("service.url");
     }
 
-
+    /**
+     * Perform an integration test using a mock Author.
+     * @throws Exception
+     */
     @Test
     public void testProcess() throws Exception {
-        List<Object> providers = new ArrayList<Object>();
-        providers.add(new org.codehaus.jackson.jaxrs.JacksonJsonProvider());
         Author au = new Author();
         au.setName("Ben Companjen");
         au.setRevision(1);
         au.setKey("/authors/OL1A");
-        System.out.println(endpointUrl + "/olbot/authorname");
-        WebClient client = WebClient.create(endpointUrl + "/olbot/authorname", providers);
-        Response r = client.accept("application/json")
+        Response r = webClient.accept("application/json")
                 .type("application/json")
                 .post(au);
         assertEquals(Response.Status.OK.getStatusCode(), r.getStatus());
@@ -45,23 +42,21 @@ public class AuthorProcessorIT {
         assertEquals("Ben_Companjen", output.getName());
     }
 
+    /**
+     * Test the processing of the author name using a sample record store in a file.
+     * @throws Exception
+     */
     @Test
     public void testProcessFile() throws Exception {
-        List<Object> providers = new ArrayList<Object>();
-        providers.add(new org.codehaus.jackson.jaxrs.JacksonJsonProvider());
-        Author au = new Author();
-        au.setName("Ben Companjen");
-        au.setRevision(1);
-        au.setKey("/authors/OL1A");
-        System.out.println(endpointUrl + "/olbot/authorname");
-        WebClient client = WebClient.create(endpointUrl + "/olbot/authorname", providers);
-        Response r = client.accept("application/json")
+        String testFile = "/author1.json";
+        JsonParser parser = factory.createJsonParser(getClass().getResourceAsStream(testFile));
+        Author au = parser.readValueAs(Author.class);
+        Response r = webClient.accept("application/json")
                 .type("application/json")
                 .post(au);
         assertEquals(Response.Status.OK.getStatusCode(), r.getStatus());
-        MappingJsonFactory factory = new MappingJsonFactory();
-        JsonParser parser = factory.createJsonParser((InputStream)r.getEntity());
+        parser = factory.createJsonParser((InputStream)r.getEntity());
         Author output = parser.readValueAs(Author.class);
-        assertEquals("Ben_Companjen", output.getName());
+        assertEquals("M._A._Padlipsky", output.getName());
     }
 }
