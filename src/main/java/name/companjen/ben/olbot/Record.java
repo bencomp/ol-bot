@@ -16,4 +16,6 @@ public interface Record {
 
     public Integer getRevision();
 
+    public void setRevision(Integer revision);
+
 }

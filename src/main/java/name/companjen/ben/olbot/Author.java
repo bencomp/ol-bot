@@ -50,6 +50,11 @@ public class Author implements Record {
         return this.revision;
     }
 
+    @Override
+    public void setRevision(Integer revision) {
+        this.revision = revision;
+    }
+
     public String getName() {
         return name;
     }
@@ -72,10 +77,6 @@ public class Author implements Record {
 
     public void setDeathDate(String deathDate) {
         this.deathDate = deathDate;
-    }
-
-    public void setRevision(Integer revision) {
-        this.revision = revision;
     }
 
     public String getPersonalName() {
